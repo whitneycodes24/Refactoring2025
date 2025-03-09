@@ -71,7 +71,7 @@ public class EmployeeSummaryDialog extends JDialog implements ActionListener {
                     emp.getGender(),
                     emp.getDepartment(),
                     emp.getSalary(),
-                    //emp.getFullTime() ? "Yes" : "No"
+                    emp.getFullTime() ? "Yes" : "No"
             };
             tableModel.addRow(rowData);
         }

@@ -62,7 +62,7 @@ public class AddRecordDialog extends JDialog implements ActionListener {
         return panel;
     }
 
-    // Panel for Save/Cancel buttons
+    // Panel for Save and Cancel buttons
     private JPanel createButtonPanel() {
         JPanel panel = new JPanel(new FlowLayout());
         panel.add(save = new JButton("Save"));

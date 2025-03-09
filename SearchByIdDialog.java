@@ -23,7 +23,7 @@ public class SearchByIdDialog extends JDialog implements ActionListener {
         setVisible(true);
     }
 
-    //panel for search input field
+    // Panel for search input field
     private JPanel createSearchPanel() {
         JPanel panel = new JPanel(new FlowLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Enter Employee ID"));
@@ -34,7 +34,7 @@ public class SearchByIdDialog extends JDialog implements ActionListener {
         return panel;
     }
 
-    //panel for Search/Cancel buttons
+    // Panel for Search and Cancel buttons
     private JPanel createButtonPanel() {
         JPanel panel = new JPanel(new FlowLayout());
         panel.add(search = new JButton("Search"));
@@ -53,7 +53,7 @@ public class SearchByIdDialog extends JDialog implements ActionListener {
         }
     }
 
-    //search employee by ID
+    // Search employee by ID
     private void searchEmployeeById() {
         try {
             String idText = searchField.getText().trim();

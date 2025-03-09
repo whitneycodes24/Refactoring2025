@@ -8,10 +8,12 @@ public class EmployeeDatabase {
         employees = new ArrayList<>();
     }
 
+    // Add a new employee
     public void addEmployee(Employee employee) {
         employees.add(employee);
     }
 
+    // Find an employee by ID
     public Employee findEmployeeById(int id) {
         for (Employee emp : employees) {
             if (emp.getEmployeeId() == id) {
@@ -21,10 +23,7 @@ public class EmployeeDatabase {
         return null;
     }
 
-    public boolean deleteEmployee(int id) {
-        return employees.removeIf(emp -> emp.getEmployeeId() == id);
-    }
-
+    // Find employees by surname
     public List<Employee> findEmployeesBySurname(String surname) {
         List<Employee> matchingEmployees = new ArrayList<>();
         for (Employee emp : employees) {
@@ -35,18 +34,18 @@ public class EmployeeDatabase {
         return matchingEmployees;
     }
 
-    public List<Employee> getAllEmployees() {
-        return new ArrayList<>(employees);
+    // Get the next available employee ID
+    public int getNextEmployeeId() {
+        return employees.size() + 1;
     }
 
-    // 🔹 **This method ensures IDs are assigned properly**
-    public int getNextEmployeeId() {
-        int maxId = 0;
-        for (Employee emp : employees) {
-            if (emp.getEmployeeId() > maxId) {
-                maxId = emp.getEmployeeId();
-            }
-        }
-        return maxId + 1; // Increment the highest ID found
+    // Delete an employee by ID
+    public boolean deleteEmployee(int id) {
+        return employees.removeIf(emp -> emp.getEmployeeId() == id);
+    }
+
+    // Retrieve all employees
+    public List<Employee> getAllEmployees() {
+        return new ArrayList<>(employees);
     }
 }

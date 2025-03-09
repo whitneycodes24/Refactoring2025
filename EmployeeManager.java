@@ -31,11 +31,12 @@ public class EmployeeManager extends JFrame implements ActionListener {
 
     private JPanel createDetailsPanel() {
         JPanel panel = new JPanel(new GridLayout(8, 2, 5, 5));
-        panel.setBorder(BorderFactory.createTitledBorder("Employee Details:"));
+        panel.setBorder(BorderFactory.createTitledBorder("Employee Details"));
 
         panel.add(new JLabel("ID:"));
         panel.add(idField = new JTextField(10));
         idField.setEditable(false);
+        generateEmployeeId(); // Automatically generate employee ID
 
         panel.add(new JLabel("PPS Number:"));
         panel.add(ppsField = new JTextField(10));
@@ -65,7 +66,7 @@ public class EmployeeManager extends JFrame implements ActionListener {
         JPanel panel = new JPanel(new FlowLayout());
         panel.add(add = new JButton("Add Employee"));
         add.addActionListener(this);
-        panel.add(modify = new JButton("Edit Employee"));
+        panel.add(modify = new JButton("Modify Employee"));
         modify.addActionListener(this);
         panel.add(delete = new JButton("Delete Employee"));
         delete.addActionListener(this);
@@ -94,11 +95,13 @@ public class EmployeeManager extends JFrame implements ActionListener {
         }
     }
 
+    private void generateEmployeeId() {
+        idField.setText(String.valueOf(employeeDatabase.getNextEmployeeId()));
+    }
+
     private void addEmployee() {
         try {
-            int id = employeeDatabase.getNextEmployeeId();
-            idField.setText(String.valueOf(id));
-
+            int id = Integer.parseInt(idField.getText().trim());
             String pps = ppsField.getText().trim();
             String surname = surnameField.getText().trim();
             String firstName = firstNameField.getText().trim();
@@ -107,47 +110,97 @@ public class EmployeeManager extends JFrame implements ActionListener {
             double salary = Double.parseDouble(salaryField.getText().trim());
             boolean fullTime = fullTimeCombo.getSelectedItem().toString().equals("Yes");
 
+            if (pps.isEmpty() || surname.isEmpty() || firstName.isEmpty() || salary <= 0) {
+                JOptionPane.showMessageDialog(this, "Please fill in all fields correctly.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             Employee employee = new Employee(id, pps, surname, firstName, gender, department, salary, fullTime);
             employeeDatabase.addEmployee(employee);
-            JOptionPane.showMessageDialog(this, "Employee Added Successfully!");
+            JOptionPane.showMessageDialog(this, "Employee added successfully!");
+
+            clearFields();
+            generateEmployeeId(); // Generate a new ID for the next employee
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Invalid input: " + ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Invalid input: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void modifyEmployee() {
-        String idStr = JOptionPane.showInputDialog(this, "Enter Employee ID to Edit:");
-        if (idStr != null) {
+        String idText = JOptionPane.showInputDialog(this, "Enter Employee ID to modify:");
+        if (idText != null) {
             try {
-                int id = Integer.parseInt(idStr);
+                int id = Integer.parseInt(idText);
                 Employee employee = employeeDatabase.findEmployeeById(id);
+    
                 if (employee != null) {
-                    employee.setSurname(surnameField.getText().trim());
-                    employee.setFirstName(firstNameField.getText().trim());
-                    employee.setGender(genderCombo.getSelectedItem().toString().charAt(0));
-                    employee.setDepartment(departmentCombo.getSelectedItem().toString());
-                    employee.setSalary(Double.parseDouble(salaryField.getText().trim()));
-                    employee.setFullTime(fullTimeCombo.getSelectedItem().toString().equals("Yes"));
-                    JOptionPane.showMessageDialog(this, "Employee Edited Successfully!");
+                    // Create a form panel to display and modify employee data
+                    JPanel panel = new JPanel(new GridLayout(8, 2, 5, 5));
+                    panel.setBorder(BorderFactory.createTitledBorder("Modify Employee Details"));
+    
+                    JTextField ppsField = new JTextField(employee.getPps());
+                    JTextField surnameField = new JTextField(employee.getSurname());
+                    JTextField firstNameField = new JTextField(employee.getFirstName());
+                    JComboBox<String> genderCombo = new JComboBox<>(GENDER_OPTIONS);
+                    genderCombo.setSelectedItem(String.valueOf(employee.getGender()));
+                    JComboBox<String> departmentCombo = new JComboBox<>(DEPARTMENT_OPTIONS);
+                    departmentCombo.setSelectedItem(employee.getDepartment());
+                    JTextField salaryField = new JTextField(String.valueOf(employee.getSalary()));
+                    JComboBox<String> fullTimeCombo = new JComboBox<>(FULLTIME_OPTIONS);
+                    fullTimeCombo.setSelectedItem(employee.getFullTime() ? "Yes" : "No");
+    
+                    // Add fields to panel
+                    panel.add(new JLabel("PPS Number:"));
+                    panel.add(ppsField);
+                    panel.add(new JLabel("Surname:"));
+                    panel.add(surnameField);
+                    panel.add(new JLabel("First Name:"));
+                    panel.add(firstNameField);
+                    panel.add(new JLabel("Gender:"));
+                    panel.add(genderCombo);
+                    panel.add(new JLabel("Department:"));
+                    panel.add(departmentCombo);
+                    panel.add(new JLabel("Salary:"));
+                    panel.add(salaryField);
+                    panel.add(new JLabel("Full Time:"));
+                    panel.add(fullTimeCombo);
+    
+                    // Show the panel in a modal dialog
+                    int result = JOptionPane.showConfirmDialog(this, panel, "Modify Employee", JOptionPane.OK_CANCEL_OPTION);
+                    
+                    if (result == JOptionPane.OK_OPTION) {
+                        // Save the updated data
+                        employee.setPps(ppsField.getText().trim());
+                        employee.setSurname(surnameField.getText().trim());
+                        employee.setFirstName(firstNameField.getText().trim());
+                        employee.setGender(genderCombo.getSelectedItem().toString().charAt(0));
+                        employee.setDepartment(departmentCombo.getSelectedItem().toString());
+                        employee.setSalary(Double.parseDouble(salaryField.getText().trim()));
+                        employee.setFullTime(fullTimeCombo.getSelectedItem().toString().equals("Yes"));
+    
+                        JOptionPane.showMessageDialog(this, "Employee modified successfully!");
+                    }
                 } else {
-                    JOptionPane.showMessageDialog(this, "Employee not Found.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Employee not found.");
                 }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Invalid ID format.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
+    
 
     private void deleteEmployee() {
-        String idStr = JOptionPane.showInputDialog(this, "Enter Employee ID to Delete:");
-        if (idStr != null) {
+        String idText = JOptionPane.showInputDialog(this, "Enter Employee ID to delete:");
+        if (idText != null) {
             try {
-                int id = Integer.parseInt(idStr);
-                boolean deleted = employeeDatabase.deleteEmployee(id);
-                if (deleted) {
+                int id = Integer.parseInt(idText);
+                if (employeeDatabase.deleteEmployee(id)) {
                     JOptionPane.showMessageDialog(this, "Employee deleted successfully!");
+                    clearFields();
+                    generateEmployeeId();
                 } else {
-                    JOptionPane.showMessageDialog(this, "Employee not found.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Employee not found.");
                 }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Invalid ID format.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -155,16 +208,28 @@ public class EmployeeManager extends JFrame implements ActionListener {
         }
     }
 
+     // Clear input fields
+     private void clearFields() {
+        ppsField.setText("");
+        surnameField.setText("");
+        firstNameField.setText("");
+        salaryField.setText("");
+        genderCombo.setSelectedIndex(0);
+        departmentCombo.setSelectedIndex(0);
+        fullTimeCombo.setSelectedIndex(0);
+    }
+
+
     private void searchEmployeeById() {
-        String idStr = JOptionPane.showInputDialog(this, "Enter Employee ID:");
-        if (idStr != null) {
+        String idText = JOptionPane.showInputDialog(this, "Enter Employee ID:");
+        if (idText != null) {
             try {
-                int id = Integer.parseInt(idStr);
+                int id = Integer.parseInt(idText);
                 Employee employee = employeeDatabase.findEmployeeById(id);
                 if (employee != null) {
-                    JOptionPane.showMessageDialog(this, employee.toString(), "Employee Found", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(this, employee.toString());
                 } else {
-                    JOptionPane.showMessageDialog(this, "Employee not found.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Employee not found.");
                 }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Invalid ID format.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -187,16 +252,7 @@ public class EmployeeManager extends JFrame implements ActionListener {
     }
 
     private void listAllEmployees() {
-        List<Employee> employees = employeeDatabase.getAllEmployees();
-        if (!employees.isEmpty()) {
-            StringBuilder result = new StringBuilder("All Employees:\n");
-            for (Employee emp : employees) {
-                result.append(emp.toString()).append("\n----------------------\n");
-            }
-            JOptionPane.showMessageDialog(this, result.toString());
-        } else {
-            JOptionPane.showMessageDialog(this, "No employees available.");
-        }
+        new EmployeeSummaryDialog(this, employeeDatabase);
     }
 
     public static void main(String[] args) {
